@@ -10,6 +10,9 @@ use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Company\InternshipController as CompanyInternshipController;
 use App\Http\Controllers\Company\ProfileController as CompanyProfileController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Company\ApplicationController as CompanyApplicationController;
+use App\Http\Controllers\Company\InternController as CompanyInternController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -94,4 +97,13 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
     // Profil
     Route::get('/profile/edit', [CompanyProfileController::class, 'edit'])->name('company.profile.edit');
     Route::post('/profile/update', [CompanyProfileController::class, 'update'])->name('company.profile.update');
+
+    //staj onay ve red
+    Route::post('/applications/{id}/accept', [CompanyApplicationController::class, 'accept'])->name('company.applications.accept');
+    Route::post('/applications/{id}/reject', [CompanyApplicationController::class, 'reject'])->name('company.applications.reject');
+
+    //stajyerler
+Route::get('/interns', [CompanyInternController::class, 'index'])->name('company.interns.index');
+
+
 });

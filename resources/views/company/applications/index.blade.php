@@ -41,8 +41,22 @@
     @else
         Yok
     @endif
-</td>
+</td> 
+<td>
+    <!-- Butonlar sadece pending olan başvurular için gösterilsin -->
+    @if($app->status === 'pending')
+       <form action="{{ route('company.applications.accept', $app->id) }}" method="POST">
+    @csrf
+    <button type="submit" class="btn btn-sm btn-success">Onayla</button>
+</form>
 
+<form action="{{ route('company.applications.reject', $app->id) }}" method="POST">
+    @csrf
+    <button type="submit" class="btn btn-sm btn-danger">Reddet</button>
+</form>
+
+    @endif
+</td>
                                 </tr>
                             @endforeach
                         </tbody>

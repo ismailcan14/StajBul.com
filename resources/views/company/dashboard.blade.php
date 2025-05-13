@@ -3,29 +3,36 @@
 @section('title', 'Şirket Paneli')
 
 @section('content')
-<div class="container mt-5">
-    <div class="d-flex align-items-center justify-content-between">
-        <h1>{{-- Logo gösterimi --}}
+<div class="text-center mb-5">
+    <h2 class="fw-bold">
         @php
             $logo = Auth::user()->company->logo ?? null;
         @endphp
 
         @if ($logo)
-            <img src="{{ $logo }}" alt="Logo" style="height: 60px; object-fit: contain;">
-        @endif Şirket Paneli</h1>
-        
-        
-    </div>
+            <img src="{{ $logo }}" alt="Logo" style="height: 60px; object-fit: contain;" class="mb-3">
+        @endif
+        <br>
+        {{ Auth::user()->company->company_name }}
+    </h2>
+</div>
 
-    <p class="mt-3">Hoş geldiniz, {{ Auth::user()->name }}!</p>
+<div class="d-flex flex-wrap justify-content-center gap-4">
+    <a href="{{ route('company.internships.create') }}" class="btn btn-lg btn-gradient">
+        <i class="fa fa-plus mb-2"></i><br>İlan Oluştur
+    </a>
+    <a href="{{ route('company.internships.index') }}" class="btn btn-lg btn-gradient">
+        <i class="fa fa-list mb-2"></i><br>İlanlarım
+    </a>
+    <a href="{{ route('company.applications.index') }}" class="btn btn-lg btn-gradient">
+        <i class="fa fa-file-alt mb-2"></i><br>Başvurular
+    </a>
+    <a href="{{ route('company.interns.index') }}" class="btn btn-lg btn-gradient">
+    <i class="fa fa-users mb-2"></i><br>Stajyerler
+</a>
 
-    <div class="mt-4">
-        <ul>
-            <li><a href="{{ route('company.internships.create') }}">Staj İlanı Oluştur</a></li>
-            <li><a href="{{ route('company.internships.index') }}">İlanlarımı Görüntüle / Düzenle</a></li>
-            <li><a href="{{ route('company.applications.index') }}">Başvuruları Görüntüle</a></li>
-            <li><a href="{{ route('company.profile.edit') }}">Profilini Düzenle</a></li>
-        </ul>
-    </div>
+    <a href="{{ route('company.profile.edit') }}" class="btn btn-lg btn-gradient">
+        <i class="fa fa-pen mb-2"></i><br>Profili Düzenle
+    </a>
 </div>
 @endsection
