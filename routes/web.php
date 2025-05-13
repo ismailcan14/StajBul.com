@@ -2,16 +2,21 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
+
+// Öğrenci
 use App\Http\Controllers\Student\InternshipController;
 use App\Http\Controllers\Student\ApplicationController;
 use App\Http\Controllers\Student\MessageController;
 use App\Http\Controllers\Student\HistoryController;
 use App\Http\Controllers\Student\ProfileController;
+
+// Şirket
 use App\Http\Controllers\Company\InternshipController as CompanyInternshipController;
-use App\Http\Controllers\Company\ProfileController as CompanyProfileController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Company\ApplicationController as CompanyApplicationController;
 use App\Http\Controllers\Company\InternController as CompanyInternController;
+use App\Http\Controllers\Company\ProfileController as CompanyProfileController;
+use App\Http\Controllers\Company\MessageController as CompanyMessageController;
 
 
 /*
@@ -20,16 +25,14 @@ use App\Http\Controllers\Company\InternController as CompanyInternController;
 |--------------------------------------------------------------------------
 */
 
-// Giriş ve çıkış
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Öğrenci kayıt
+// Kayıt
 Route::get('/register/student', [AuthController::class, 'showStudentRegisterForm'])->name('register.student.form');
 Route::post('/register/student', [AuthController::class, 'registerStudent'])->name('register.student');
 
-// Şirket kayıt
 Route::get('/register/company', [AuthController::class, 'showCompanyRegisterForm'])->name('register.company.form');
 Route::post('/register/company', [AuthController::class, 'registerCompany'])->name('register.company');
 
@@ -46,9 +49,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('student')->group(function () {
-
-    // Dashboard
-    Route::get('/dashboard', fn() => view('student.dashboard'))->name('student.dashboard');
+    Route::get('/dashboard', fn () => view('student.dashboard'))->name('student.dashboard');
 
     // Staj ilanları
     Route::get('/internships', [InternshipController::class, 'index'])->name('student.internships.index');
@@ -63,6 +64,8 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     Route::get('/messages', [MessageController::class, 'index'])->name('student.messages.index');
     Route::get('/messages/{company_id}', [MessageController::class, 'chat'])->name('student.messages.chat');
     Route::post('/messages/send', [MessageController::class, 'send'])->name('student.messages.send');
+    Route::post('/student/messages/fetch', [MessageController::class, 'fetchMessages'])->name('student.messages.fetch');
+
 
     // Staj geçmişi
     Route::get('/history', [HistoryController::class, 'index'])->name('student.history.index');
@@ -79,11 +82,9 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('company')->group(function () {
+    Route::get('/dashboard', fn () => view('company.dashboard'))->name('company.dashboard');
 
-    // Dashboard
-    Route::get('/dashboard', fn() => view('company.dashboard'))->name('company.dashboard');
-
-    // Staj ilanları
+    // İlanlar
     Route::get('/internships', [CompanyInternshipController::class, 'index'])->name('company.internships.index');
     Route::get('/internships/create', [CompanyInternshipController::class, 'create'])->name('company.internships.create');
     Route::post('/internships', [CompanyInternshipController::class, 'store'])->name('company.internships.store');
@@ -93,17 +94,30 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
 
     // Başvurular
     Route::get('/applications', [CompanyInternshipController::class, 'applications'])->name('company.applications.index');
+    Route::post('/applications/{id}/accept', [CompanyApplicationController::class, 'accept'])->name('company.applications.accept');
+    Route::post('/applications/{id}/reject', [CompanyApplicationController::class, 'reject'])->name('company.applications.reject');
 
     // Profil
     Route::get('/profile/edit', [CompanyProfileController::class, 'edit'])->name('company.profile.edit');
     Route::post('/profile/update', [CompanyProfileController::class, 'update'])->name('company.profile.update');
 
-    //staj onay ve red
-    Route::post('/applications/{id}/accept', [CompanyApplicationController::class, 'accept'])->name('company.applications.accept');
-    Route::post('/applications/{id}/reject', [CompanyApplicationController::class, 'reject'])->name('company.applications.reject');
+    // Stajyerler
+    Route::get('/interns', [CompanyInternController::class, 'index'])->name('company.interns.index');
 
-    //stajyerler
-Route::get('/interns', [CompanyInternController::class, 'index'])->name('company.interns.index');
+    // Staj bitirme işlemi
+    Route::get('/internships/complete/{application}', [CompanyInternshipController::class, 'completeForm'])->name('company.internships.complete');
+    Route::post('/internships/complete/{application}', [CompanyInternshipController::class, 'storeCompletion'])->name('company.internships.complete.store'); // 🔧 düzeltildi
+
+    // Tamamlanan stajlar
+    Route::get('/internships/completed', [CompanyInternshipController::class, 'completed'])->name('company.internships.completed');
+
+    //mesajlar 
+    Route::get('/messages', [CompanyMessageController::class, 'index'])->name('company.messages.index');
+    Route::get('/messages/{student_id}', [CompanyMessageController::class, 'chat'])->name('company.messages.chat');
+    Route::post('/messages/send', [CompanyMessageController::class, 'send'])->name('company.messages.send');
+    Route::post('/company/messages/fetch', [CompanyMessageController::class, 'fetchMessages'])->name('company.messages.fetch');
+
+
 
 
 });

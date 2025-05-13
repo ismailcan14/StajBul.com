@@ -4,10 +4,9 @@
 
 @section('content')
 <div class="container">
-    <h4>{{ $company->company_name }} ile sohbet</h4>
+    <h4>{{ $student->name }} ile Sohbet</h4>
 
     <div id="chat-box" class="chat-box border rounded p-3 mb-3" style="height: 400px; overflow-y: scroll;">
-        {{-- İlk yükleme için --}}
         @foreach($messages as $msg)
             <div class="mb-2 text-{{ $msg->sender_id === Auth::id() ? 'end' : 'start' }}">
                 <span class="d-inline-block p-2 rounded bg-{{ $msg->sender_id === Auth::id() ? 'primary' : 'light' }} text-{{ $msg->sender_id === Auth::id() ? 'white' : 'dark' }}">
@@ -20,9 +19,9 @@
 
     <form id="message-form">
         @csrf
-        <input type="hidden" name="receiver_id" value="{{ $company->user_id }}">
+        <input type="hidden" name="receiver_id" value="{{ $student->id }}">
         <div class="input-group">
-            <input type="text" name="message" id="message-input" class="form-control" placeholder="Mesajınızı yazın..." required>
+            <input type="text" name="message" id="message-input" class="form-control" placeholder="Mesaj yaz..." required>
             <button type="submit" class="btn btn-primary">Gönder</button>
         </div>
     </form>
@@ -44,7 +43,7 @@
 
     // Yeni mesajları çek
     async function fetchMessages() {
-        const response = await fetch("{{ route('student.messages.fetch') }}", {
+        const response = await fetch("{{ route('company.messages.fetch') }}", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -81,7 +80,7 @@
         const formData = new FormData(form);
         const message = formData.get('message');
 
-        const response = await fetch("{{ route('student.messages.send') }}", {
+        const response = await fetch("{{ route('company.messages.send') }}", {
             method: "POST",
             headers: {
                 'X-CSRF-TOKEN': csrfToken
@@ -91,14 +90,14 @@
 
         if (response.ok) {
             messageInput.value = '';
-            await fetchMessages(); // yeniden mesajları çek
+            await fetchMessages(); // anlık güncelle
         }
     });
 
     // Sayfa ilk yüklendiğinde
     scrollToBottom();
 
-    // Her 5 saniyede bir yeni mesajları kontrol et
+    // Her 5 saniyede bir mesajları yenile
     setInterval(fetchMessages, 5000);
 </script>
 @endsection
