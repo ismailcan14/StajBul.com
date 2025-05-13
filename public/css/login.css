@@ -1,0 +1,99 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.login-box {
+    background-color: #fff;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+
+.login-box.animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.login-box h2 {
+    margin-bottom: 20px;
+    color: #0d6efd; /* Logo ile aynı mavi */
+}
+
+.login-box input,
+.login-box select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* Modern select görünümü */
+.login-box select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2210%22%20height%3D%225%22%20viewBox%3D%220%200%2010%205%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200l5%205%205-5z%22%20fill%3D%22%23333%22/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    cursor: pointer;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0d6efd; /* Logo ile aynı mavi */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-box button:hover {
+    background-color: #084dc2;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* Logo üstte ortalı */
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: -50px;
+}
+
+.logo-wrapper img {
+    max-height: 240px;
+}

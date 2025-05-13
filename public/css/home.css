@@ -1,0 +1,79 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom right, #74ebd5, #9face6);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.hero p {
+    font-size: 1.4rem;
+    margin-top: 1rem;
+    max-width: 700px;
+    color: #fff;
+}
+
+
+.btn-group {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.home-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 30px;
+    background-color: white;
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.home-btn:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
+
+.section {
+    background-color: white;
+    color: #333;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.section h2 {
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.section p {
+    max-width: 700px;
+    margin: auto;
+    font-size: 1rem;
+}
+
+/* Modal içerik özelleştirmesi */
+.modal-content {
+    border-radius: 20px;
+    padding: 20px;
+}
