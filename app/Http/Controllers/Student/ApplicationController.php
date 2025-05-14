@@ -5,56 +5,85 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Application;
+use App\Models\Internship;
 
 class ApplicationController extends Controller
 {
     public function index()
-{
-    $student = Auth::user()->student;
+    {
+        $student = Auth::user()->student;
 
-    $applications = \App\Models\Application::with('internshipPosting')
-        ->where('student_id', $student->id)
-        ->latest()
-        ->get();
+        $applications = Application::with('internshipPosting')
+            ->where('student_id', $student->id)
+            ->latest()
+            ->get();
 
-    return view('student.applications.index', compact('applications'));
-}
-
+        return view('student.applications.index', compact('applications'));
+    }
 
     public function store(Request $request, $id)
     {
-        // Yalnızca CV dosyasının doğrulamasını yapıyoruz
         $request->validate([
-            'cv' => 'required|mimes:pdf,doc,docx|max:2048',  // Maksimum 2MB
+            'cv' => 'required|mimes:pdf,doc,docx|max:2048',
+            'cover_letter' => 'nullable|string',
         ]);
-    
+
         $student = Auth::user()->student;
-    
-        // Dosyayı storage'a kaydediyoruz
+
+        // Devam eden bir stajı varsa başvuru engelle
+        if ($student->internship && is_null($student->internship->end_date)) {
+            return redirect()->back()->with('error', 'Devam eden stajınız var. Yeni başvuru yapamazsınız.');
+        }
+
         $cvPath = $request->file('cv')->store('cv_uploads', 'public');
-    
-        // Başvuruyu kaydet
-        \App\Models\Application::create([
+
+        Application::create([
             'student_id' => $student->id,
             'internship_posting_id' => $id,
-            'cv_path' => $cvPath,  // CV dosya yolu
+            'cv_path' => $cvPath,
+            'cover_letter' => $request->cover_letter,
             'status' => 'pending',
         ]);
-    
+
         return redirect()->route('student.applications.index')->with('success', 'Başvurunuz alınmıştır.');
     }
-    public function destroy($id)
-{
-    $application = \App\Models\Application::findOrFail($id);
 
-    // Sadece kendi başvurusunu silebilsin
-    if ($application->student_id !== Auth::user()->student->id) {
-        abort(403, 'Bu başvuru size ait değil.');
+    public function destroy($id)
+    {
+        $application = Application::findOrFail($id);
+
+        if ($application->student_id !== Auth::user()->student->id) {
+            abort(403, 'Bu başvuru size ait değil.');
+        }
+
+        $application->delete();
+
+        return redirect()->route('student.applications.index')->with('success', 'Başvuru iptal edildi.');
     }
 
-    $application->delete();
+    // ✅ Öğrenci stajı başlatıyor (kabul edilen başvuruyu onaylayarak)
+    public function confirmAccepted($id)
+    {
+        $application = Application::findOrFail($id);
 
-    return redirect()->route('student.applications.index')->with('success', 'Başvuru iptal edildi.');
-}
+        if ($application->student_id !== auth()->user()->student->id || $application->status !== 'accepted') {
+            return redirect()->back()->with('error', 'Bu başvuruyu onaylayamazsınız.');
+        }
 
+        // Zaten aktif stajı varsa engelle
+        $hasActiveInternship = auth()->user()->student->internships()->whereNull('end_date')->exists();
+
+        if ($hasActiveInternship) {
+            return redirect()->back()->with('error', 'Devam eden bir stajınız var.');
+        }
+
+        Internship::create([
+            'student_id' => $application->student_id,
+            'company_id' => $application->internshipPosting->company_id,
+            'start_date' => now(),
+        ]);
+
+        return redirect()->route('student.internships.index')->with('success', 'Stajınız başlatıldı.');
+    }
 }

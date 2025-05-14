@@ -6,7 +6,8 @@
 <div class="container mt-5">
     <h3 class="mb-4">Stajı Tamamla: {{ $application->student->user->name }}</h3>
 
-    <form action="{{ route('company.internships.store', $application->id) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('company.internships.complete.store', $application->id) }}" method="POST" enctype="multipart/form-data">
+
         @csrf
 
         <div class="mb-3">

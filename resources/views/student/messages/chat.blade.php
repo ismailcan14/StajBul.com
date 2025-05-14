@@ -3,102 +3,33 @@
 @section('title', 'Mesajlaşma')
 
 @section('content')
-<div class="container">
-    <h4>{{ $company->company_name }} ile sohbet</h4>
+<div class="container my-5">
+    <h4 class="text-center fw-semibold mb-4 text-primary">
+        💬 {{ $company->company_name }} ile Sohbet
+    </h4>
 
-    <div id="chat-box" class="chat-box border rounded p-3 mb-3" style="height: 400px; overflow-y: scroll;">
-        {{-- İlk yükleme için --}}
-        @foreach($messages as $msg)
-            <div class="mb-2 text-{{ $msg->sender_id === Auth::id() ? 'end' : 'start' }}">
-                <span class="d-inline-block p-2 rounded bg-{{ $msg->sender_id === Auth::id() ? 'primary' : 'light' }} text-{{ $msg->sender_id === Auth::id() ? 'white' : 'dark' }}">
+    <div class="chat-box border rounded-4 shadow-sm p-3 mb-4 bg-white" style="height: 400px; overflow-y: auto;">
+        @forelse($messages as $msg)
+            <div class="mb-3 d-flex flex-column {{ $msg->sender_id === Auth::id() ? 'align-items-end' : 'align-items-start' }}">
+                <div class="chat-bubble bg-{{ $msg->sender_id === Auth::id() ? 'primary text-white' : 'light text-dark' }}">
                     {{ $msg->message }}
-                </span>
-                <div><small class="text-muted">{{ $msg->created_at->format('H:i d.m.Y H:i') }}</small></div>
+                </div>
+                <small class="text-muted mt-1">
+                    {{ $msg->created_at->format('H:i d.m.Y') }}
+                </small>
             </div>
-        @endforeach
+        @empty
+            <p class="text-muted text-center">Henüz mesaj yok.</p>
+        @endforelse
     </div>
 
-    <form id="message-form">
+    <form method="POST" action="{{ route('student.messages.send') }}">
         @csrf
         <input type="hidden" name="receiver_id" value="{{ $company->user_id }}">
         <div class="input-group">
-            <input type="text" name="message" id="message-input" class="form-control" placeholder="Mesajınızı yazın..." required>
-            <button type="submit" class="btn btn-primary">Gönder</button>
+            <input type="text" name="message" class="form-control rounded-start-pill" placeholder="Mesajınızı yazın..." required>
+            <button type="submit" class="btn btn-gradient rounded-end-pill px-4">Gönder</button>
         </div>
     </form>
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    const form = document.getElementById('message-form');
-    const chatBox = document.getElementById('chat-box');
-    const messageInput = document.getElementById('message-input');
-    const receiverId = form.querySelector('input[name="receiver_id"]').value;
-    const csrfToken = form.querySelector('input[name="_token"]').value;
-
-    // Scroll en alta
-    function scrollToBottom() {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Yeni mesajları çek
-    async function fetchMessages() {
-        const response = await fetch("{{ route('student.messages.fetch') }}", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: JSON.stringify({ receiver_id: receiverId })
-        });
-
-        if (response.ok) {
-            const messages = await response.json();
-            chatBox.innerHTML = ''; // temizle
-
-            messages.forEach(msg => {
-                const isMine = msg.sender_id === {{ Auth::id() }};
-                const wrapper = document.createElement('div');
-                wrapper.className = `mb-2 text-${isMine ? 'end' : 'start'}`;
-                wrapper.innerHTML = `
-                    <span class="d-inline-block p-2 rounded bg-${isMine ? 'primary' : 'light'} text-${isMine ? 'white' : 'dark'}">
-                        ${msg.message}
-                    </span>
-                    <div><small class="text-muted">${new Date(msg.created_at).toLocaleString('tr-TR')}</small></div>
-                `;
-                chatBox.appendChild(wrapper);
-            });
-
-            scrollToBottom();
-        }
-    }
-
-    // Mesaj gönder
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(form);
-        const message = formData.get('message');
-
-        const response = await fetch("{{ route('student.messages.send') }}", {
-            method: "POST",
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: formData
-        });
-
-        if (response.ok) {
-            messageInput.value = '';
-            await fetchMessages(); // yeniden mesajları çek
-        }
-    });
-
-    // Sayfa ilk yüklendiğinde
-    scrollToBottom();
-
-    // Her 5 saniyede bir yeni mesajları kontrol et
-    setInterval(fetchMessages, 5000);
-</script>
 @endsection

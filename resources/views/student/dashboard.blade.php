@@ -4,27 +4,36 @@
 
 @section('content')
 
-    <div class="text-center mb-5">
-        <h2 class="fw-bold">
-             {{ Auth::user()->name }} {{ Auth::user()->surname }}<br>
-        </h2>
-    </div>
+<div class="student-dashboard">
+    <h2 class="student-name">{{ Auth::user()->name }} {{ Auth::user()->surname }}</h2>
 
-    <div class="d-flex flex-wrap justify-content-center gap-4">
-        <a href="{{ route('student.profile') }}" class="btn btn-lg btn-gradient">
-            <i class="fa fa-user mb-2"></i><br>Profilim
+    <div class="dashboard-grid">
+        <a href="{{ route('student.profile') }}" class="dashboard-card">
+            <i class="fa fa-user"></i>
+            <span>Profilim</span>
         </a>
-        <a href="{{ route('student.internships.index') }}" class="btn btn-lg btn-gradient">
-            <i class="fa fa-briefcase mb-2"></i><br>İlanlar
+        <a href="{{ route('student.internships.index') }}" class="dashboard-card">
+            <i class="fa fa-briefcase"></i>
+            <span>İlanlar</span>
         </a>
-        <a href="{{ route('student.applications.index') }}" class="btn btn-lg btn-gradient">
-            <i class="fa fa-file-alt mb-2"></i><br>Başvurularım
+        <a href="{{ route('student.applications.index') }}" class="dashboard-card">
+            <i class="fa fa-file-alt"></i>
+            <span>Başvurularım</span>
         </a>
-        <a href="{{ route('student.messages.index') }}" class="btn btn-lg btn-gradient">
-            <i class="fa fa-envelope mb-2"></i><br>Mesajlar
+        <a href="{{ route('student.internship.active') }}" class="dashboard-card">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Aktif Stajım</span>
         </a>
-        <a href="{{ route('student.history.index') }}" class="btn btn-lg btn-gradient">
-            <i class="fa fa-history mb-2"></i><br>Staj Geçmişim
+        <a href="{{ route('student.messages.index') }}" class="dashboard-card">
+            <i class="fa fa-envelope"></i>
+            <span>Mesajlar</span>
+        </a>
+        <a href="{{ route('student.history.index') }}" class="dashboard-card">
+            <i class="fa fa-history"></i>
+            <span>Staj Geçmişim</span>
         </a>
     </div>
+</div>
+
+
 @endsection

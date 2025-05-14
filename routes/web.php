@@ -74,6 +74,10 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('student.profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('student.profile.edit');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('student.profile.update');
+    //?
+    Route::get('/active-internship', [InternshipController::class, 'active'])
+    ->name('student.internship.active');
+    Route::post('/applications/{id}/confirm', [ApplicationController::class, 'confirmAccepted'])->name('applications.confirm');
 });
 
 /*
