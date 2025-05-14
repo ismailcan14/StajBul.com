@@ -121,7 +121,9 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
     Route::post('/messages/send', [CompanyMessageController::class, 'send'])->name('company.messages.send');
     Route::post('/company/messages/fetch', [CompanyMessageController::class, 'fetchMessages'])->name('company.messages.fetch');
 
-
-
-
 });
+
+
+
+
+

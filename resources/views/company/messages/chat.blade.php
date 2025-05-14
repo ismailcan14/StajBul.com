@@ -3,101 +3,85 @@
 @section('title', 'Mesajlaşma')
 
 @section('content')
-<div class="container">
-    <h4>{{ $student->name }} ile Sohbet</h4>
+<div class="container my-5">
+    <h4 class="text-center fw-semibold mb-4 text-primary">
+        💬 {{ $student->name }} ile Sohbet
+    </h4>
 
-    <div id="chat-box" class="chat-box border rounded p-3 mb-3" style="height: 400px; overflow-y: scroll;">
+    <div class="chat-box border rounded-4 shadow-sm p-3 mb-4 bg-white" style="height: 400px; overflow-y: auto;" id="chat-box">
         @foreach($messages as $msg)
-            <div class="mb-2 text-{{ $msg->sender_id === Auth::id() ? 'end' : 'start' }}">
-                <span class="d-inline-block p-2 rounded bg-{{ $msg->sender_id === Auth::id() ? 'primary' : 'light' }} text-{{ $msg->sender_id === Auth::id() ? 'white' : 'dark' }}">
+            <div class="mb-3 d-flex flex-column {{ $msg->sender_id === Auth::id() ? 'align-items-end' : 'align-items-start' }}">
+                <div class="chat-bubble bg-{{ $msg->sender_id === Auth::id() ? 'primary text-white' : 'light text-dark' }}">
                     {{ $msg->message }}
-                </span>
-                <div><small class="text-muted">{{ $msg->created_at->format('H:i d.m.Y H:i') }}</small></div>
+                </div>
+                <small class="text-muted mt-1">
+                    {{ $msg->created_at->format('H:i d.m.Y') }}
+                </small>
             </div>
         @endforeach
     </div>
 
-    <form id="message-form">
+    <form method="POST" action="{{ route('company.messages.send') }}" id="message-form">
         @csrf
-        <input type="hidden" name="receiver_id" value="{{ $student->id }}">
+        <input type="hidden" name="receiver_id" id="receiver-id" value="{{ $student->id }}">
         <div class="input-group">
-            <input type="text" name="message" id="message-input" class="form-control" placeholder="Mesaj yaz..." required>
-            <button type="submit" class="btn btn-primary">Gönder</button>
+            <input type="text" name="message" class="form-control rounded-start-pill" placeholder="Mesaj yazın..." required>
+            <button type="submit" class="btn btn-gradient rounded-end-pill px-4">Gönder</button>
         </div>
     </form>
 </div>
-@endsection
 
-@section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const form = document.getElementById('message-form');
-    const chatBox = document.getElementById('chat-box');
-    const messageInput = document.getElementById('message-input');
-    const receiverId = form.querySelector('input[name="receiver_id"]').value;
-    const csrfToken = form.querySelector('input[name="_token"]').value;
+$(document).ready(function() {
+    const receiverId = $('#receiver-id').val();
 
-    // Scroll en alta
-    function scrollToBottom() {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Yeni mesajları çek
-    async function fetchMessages() {
-        const response = await fetch("{{ route('company.messages.fetch') }}", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: JSON.stringify({ receiver_id: receiverId })
-        });
-
-        if (response.ok) {
-            const messages = await response.json();
-            chatBox.innerHTML = ''; // temizle
-
-            messages.forEach(msg => {
-                const isMine = msg.sender_id === {{ Auth::id() }};
-                const wrapper = document.createElement('div');
-                wrapper.className = `mb-2 text-${isMine ? 'end' : 'start'}`;
-                wrapper.innerHTML = `
-                    <span class="d-inline-block p-2 rounded bg-${isMine ? 'primary' : 'light'} text-${isMine ? 'white' : 'dark'}">
-                        ${msg.message}
-                    </span>
-                    <div><small class="text-muted">${new Date(msg.created_at).toLocaleString('tr-TR')}</small></div>
-                `;
-                chatBox.appendChild(wrapper);
-            });
-
-            scrollToBottom();
-        }
-    }
-
-    // Mesaj gönder
-    form.addEventListener('submit', async function(e) {
+    $('#message-form').on('submit', function(e) {
         e.preventDefault();
-
-        const formData = new FormData(form);
-        const message = formData.get('message');
-
-        const response = await fetch("{{ route('company.messages.send') }}", {
-            method: "POST",
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: formData
+        var formData = $(this).serialize();
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#chat-box').append(`
+                    <div class="mb-3 d-flex flex-column align-items-end">
+                        <div class="chat-bubble bg-primary text-white">
+                            ${response.message}
+                        </div>
+                        <small class="text-muted mt-1">${response.time}</small>
+                    </div>
+                `);
+                $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+                $('input[name="message"]').val('');
+            }
         });
-
-        if (response.ok) {
-            messageInput.value = '';
-            await fetchMessages(); // anlık güncelle
-        }
     });
 
-    // Sayfa ilk yüklendiğinde
-    scrollToBottom();
-
-    // Her 5 saniyede bir mesajları yenile
-    setInterval(fetchMessages, 5000);
+    setInterval(function () {
+        $.ajax({
+            url: "{{ route('company.messages.fetch') }}",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                receiver_id: receiverId
+            },
+            success: function(response) {
+                $('#chat-box').html('');
+                response.forEach(function(msg) {
+                    $('#chat-box').append(`
+                        <div class="mb-3 d-flex flex-column ${msg.is_sender ? 'align-items-end' : 'align-items-start'}">
+                            <div class="chat-bubble bg-${msg.is_sender ? 'primary text-white' : 'light text-dark'}">
+                                ${msg.message}
+                            </div>
+                            <small class="text-muted mt-1">${msg.time}</small>
+                        </div>
+                    `);
+                });
+                $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
+            }
+        });
+    }, 3000);
+});
 </script>
 @endsection

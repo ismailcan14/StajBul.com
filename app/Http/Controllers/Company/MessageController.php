@@ -1,12 +1,10 @@
 <?php
-
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Message;
-use App\Models\Student;
 use App\Models\User;
 
 class MessageController extends Controller
@@ -15,13 +13,10 @@ class MessageController extends Controller
     {
         $companyUserId = Auth::id();
 
-        // Bu şirketle mesajlaşmış öğrenciler (id ile gruplanmış)
         $studentIds = Message::where('receiver_id', $companyUserId)
             ->orWhere('sender_id', $companyUserId)
             ->pluck('sender_id')
-            ->merge(
-                Message::where('receiver_id', $companyUserId)->pluck('receiver_id')
-            )
+            ->merge(Message::where('receiver_id', $companyUserId)->pluck('receiver_id'))
             ->unique()
             ->filter(fn ($id) => $id !== $companyUserId);
 
@@ -40,7 +35,7 @@ class MessageController extends Controller
             $q->where('sender_id', $student_id)->where('receiver_id', $companyUserId);
         })->orderBy('created_at')->get();
 
-        $student = \App\Models\User::findOrFail($student_id);
+        $student = User::with('student')->findOrFail($student_id);
 
         return view('company.messages.chat', compact('student', 'messages'));
     }
@@ -52,27 +47,40 @@ class MessageController extends Controller
             'message' => 'required|string',
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
             'message' => $request->message,
             'is_read' => false,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'message' => $message->message,
+                'time' => $message->created_at->format('H:i d.m.Y'),
+            ]);
+        }
+
         return back();
     }
+
     public function fetchMessages(Request $request)
-{
-    $userId = Auth::id();
-    $otherUserId = $request->input('receiver_id');
+    {
+        $userId = Auth::id();
+        $otherUserId = $request->input('receiver_id');
 
-    $messages = Message::where(function ($q) use ($userId, $otherUserId) {
-        $q->where('sender_id', $userId)->where('receiver_id', $otherUserId);
-    })->orWhere(function ($q) use ($userId, $otherUserId) {
-        $q->where('sender_id', $otherUserId)->where('receiver_id', $userId);
-    })->orderBy('created_at')->get();
+        $messages = Message::where(function ($q) use ($userId, $otherUserId) {
+            $q->where('sender_id', $userId)->where('receiver_id', $otherUserId);
+        })->orWhere(function ($q) use ($userId, $otherUserId) {
+            $q->where('sender_id', $otherUserId)->where('receiver_id', $userId);
+        })->orderBy('created_at')->get();
 
-    return response()->json($messages);
-}
-
+        return response()->json($messages->map(function ($msg) use ($userId) {
+            return [
+                'message' => $msg->message,
+                'time' => $msg->created_at->format('H:i d.m.Y'),
+                'is_sender' => $msg->sender_id === $userId,
+            ];
+        }));
+    }
 }

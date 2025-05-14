@@ -12,24 +12,33 @@
     <link rel="stylesheet" href="{{ asset('css/student/student-dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/student/internship-detail.css') }}">
-<script src="{{ asset('js/student/internship-detail.js') }}" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{{ asset('js/student/student.js') }}" defer></script>
-  
+
+    <script src="{{ asset('js/student/internship-detail.js') }}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/student/student.js') }}" defer></script>
 </head>
+@yield('scripts')
 <body>
 
     <!-- Navbar -->
-  
-
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark py-3">
         <div class="container">
- 
 
-        <a class="navbar-brand d-flex align-items-center" href="{{ url('/student/dashboard') }}">
-    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="stajbul-logo me-2">
-</a>
+            @php
+                $dashboardUrl = '/';
+                if (auth()->check()) {
+                    $dashboardUrl = match(auth()->user()->role) {
+                        'student' => route('student.dashboard'),
+                        'company' => route('company.dashboard'),
+                        'admin' => '#', // admin için özel bir panelin varsa route yazabilirsin
+                        default => '/',
+                    };
+                }
+            @endphp
 
+            <a class="navbar-brand d-flex align-items-center" href="{{ $dashboardUrl }}">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="stajbul-logo me-2">
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -50,7 +59,6 @@
                     @endauth
 
                     @guest
-                      
                         <li class="nav-item"><a class="nav-link" href="{{ route('register.student.form') }}">Öğrenci Kayıt</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('register.company.form') }}">Şirket Kayıt</a></li>
                     @endguest

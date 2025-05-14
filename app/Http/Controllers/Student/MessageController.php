@@ -40,12 +40,40 @@ class MessageController extends Controller
             'message' => 'required|string',
         ]);
 
-        Message::create([
+        $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
             'message' => $request->message,
             'is_read' => false,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'message' => $message->message,
+                'time' => $message->created_at->format('H:i d.m.Y'),
+            ]);
+        }
+
         return back();
-    }}
+    }
+
+    public function fetchMessages(Request $request)
+    {
+        $userId = Auth::id();
+        $otherUserId = $request->input('receiver_id');
+
+        $messages = Message::where(function ($q) use ($userId, $otherUserId) {
+            $q->where('sender_id', $userId)->where('receiver_id', $otherUserId);
+        })->orWhere(function ($q) use ($userId, $otherUserId) {
+            $q->where('sender_id', $otherUserId)->where('receiver_id', $userId);
+        })->orderBy('created_at')->get();
+
+        return response()->json($messages->map(function ($msg) use ($userId) {
+            return [
+                'message' => $msg->message,
+                'time' => $msg->created_at->format('H:i d.m.Y'),
+                'is_sender' => $msg->sender_id === $userId,
+            ];
+        }));
+    }
+}

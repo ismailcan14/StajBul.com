@@ -24,11 +24,12 @@ class ApplicationController extends Controller
 
     public function store(Request $request, $id)
     {
+        
         $request->validate([
             'cv' => 'required|mimes:pdf,doc,docx|max:2048',
             'cover_letter' => 'nullable|string',
         ]);
-
+        
         $student = Auth::user()->student;
 
         // Devam eden bir stajı varsa başvuru engelle
@@ -37,7 +38,7 @@ class ApplicationController extends Controller
         }
 
         $cvPath = $request->file('cv')->store('cv_uploads', 'public');
-
+       
         Application::create([
             'student_id' => $student->id,
             'internship_posting_id' => $id,
