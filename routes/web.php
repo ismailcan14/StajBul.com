@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
@@ -17,7 +16,6 @@ use App\Http\Controllers\Company\ApplicationController as CompanyApplicationCont
 use App\Http\Controllers\Company\InternController as CompanyInternController;
 use App\Http\Controllers\Company\ProfileController as CompanyProfileController;
 use App\Http\Controllers\Company\MessageController as CompanyMessageController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +57,7 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     // Başvurular
     Route::get('/applications', [ApplicationController::class, 'index'])->name('student.applications.index');
     Route::delete('/applications/{id}', [ApplicationController::class, 'destroy'])->name('student.applications.destroy');
+    Route::post('/applications/{id}/confirm', [ApplicationController::class, 'confirmAccepted'])->name('applications.confirm');
 
     // Mesajlar
     Route::get('/messages', [MessageController::class, 'index'])->name('student.messages.index');
@@ -66,18 +65,14 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
     Route::post('/messages/send', [MessageController::class, 'send'])->name('student.messages.send');
     Route::post('/student/messages/fetch', [MessageController::class, 'fetchMessages'])->name('student.messages.fetch');
 
-
-    // Staj geçmişi
+    // Aktif staj ve geçmiş
+    Route::get('/active-internship', [InternshipController::class, 'active'])->name('student.internship.active');
     Route::get('/history', [HistoryController::class, 'index'])->name('student.history.index');
 
     // Profil
     Route::get('/profile', [ProfileController::class, 'index'])->name('student.profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('student.profile.edit');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('student.profile.update');
-    //?
-    Route::get('/active-internship', [InternshipController::class, 'active'])
-    ->name('student.internship.active');
-    Route::post('/applications/{id}/confirm', [ApplicationController::class, 'confirmAccepted'])->name('applications.confirm');
 });
 
 /*
@@ -108,21 +103,19 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
     // Stajyerler
     Route::get('/interns', [CompanyInternController::class, 'index'])->name('company.interns.index');
 
-    // Staj bitirme işlemi
-    Route::get('/internships/complete/{application}', [CompanyInternshipController::class, 'completeForm'])->name('company.internships.complete');
-    Route::post('/internships/complete/{application}', [CompanyInternshipController::class, 'storeCompletion'])->name('company.internships.complete.store'); // 🔧 düzeltildi
+    // 🔄 Stajı tamamlama (internship üzerinden)
+    Route::get('/internships/complete/{internship}', [CompanyInternshipController::class, 'completeForm'])->name('company.internships.complete');
+    Route::post('/internships/complete/{internship}', [CompanyInternshipController::class, 'storeCompletion'])->name('company.internships.complete.store');
 
     // Tamamlanan stajlar
     Route::get('/internships/completed', [CompanyInternshipController::class, 'completed'])->name('company.internships.completed');
 
-    //mesajlar 
+    // Mesajlar
     Route::get('/messages', [CompanyMessageController::class, 'index'])->name('company.messages.index');
     Route::get('/messages/{student_id}', [CompanyMessageController::class, 'chat'])->name('company.messages.chat');
     Route::post('/messages/send', [CompanyMessageController::class, 'send'])->name('company.messages.send');
     Route::post('/company/messages/fetch', [CompanyMessageController::class, 'fetchMessages'])->name('company.messages.fetch');
-
 });
-
 
 
 

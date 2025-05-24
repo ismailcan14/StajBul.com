@@ -1,60 +1,44 @@
 @extends('layouts.app')
 
-@section('title', 'Stajyerler')
+@section('title', 'Aktif Stajyerler')
 
 @section('content')
 <div class="container mt-4">
-    <h2 class="mb-4">Stajyerler</h2>
-
-    @php
-        $currentFilter = request('filter');
-    @endphp
+    <h2 class="mb-4">🎓 Aktif Stajyerler</h2>
 
     <div class="mb-3">
-        <a href="?filter=active" class="btn btn-sm {{ $currentFilter === 'active' ? 'btn-success' : 'btn-outline-success' }}">Aktif</a>
-        <a href="?filter=completed" class="btn btn-sm {{ $currentFilter === 'completed' ? 'btn-primary' : 'btn-outline-primary' }}">Bekleyen</a>
-        <a href="?filter=rejected" class="btn btn-sm {{ $currentFilter === 'rejected' ? 'btn-danger' : 'btn-outline-danger' }}">Reddedilen</a>
+        <a href="{{ route('company.interns.index', ['filter' => 'active']) }}" class="btn btn-sm {{ $currentFilter === 'active' ? 'btn-success' : 'btn-outline-success' }}">Aktif</a>
+        <a href="{{ route('company.interns.index', ['filter' => 'accepted']) }}" class="btn btn-sm {{ $currentFilter === 'accepted' ? 'btn-primary' : 'btn-outline-primary' }}">Onaylı Ama Başlamamış</a>
+        <a href="{{ route('company.interns.index', ['filter' => 'rejected']) }}" class="btn btn-sm {{ $currentFilter === 'rejected' ? 'btn-danger' : 'btn-outline-danger' }}">Reddedilenler</a>
     </div>
 
-    <table class="table table-bordered">
-       <thead>
-    <tr>
-        <th>Ad Soyad</th>
-        <th>İlan</th>
-        <th>Durum</th>
-        <th>İşlem</th>
-    </tr>
-</thead>
-<tbody>
-    @forelse($applications as $app)
-        @php $status = $app->status; @endphp
-        <tr>
-            <td>{{ $app->student->user->name }}</td>
-            <td>{{ $app->internshipPosting->title }}</td>
-            <td>
-                @if($status === 'accepted')
-                    <span class="badge bg-success">Aktif</span>
-                @elseif($status === 'rejected')
-                    <span class="badge bg-danger">Reddedildi</span>
-                @else
-                    <span class="badge bg-warning text-dark">Bekliyor</span>
-                @endif
-            </td>
-            <td>
-                @if($status === 'accepted')
-                    <a href="{{ route('company.internships.complete', ['application' => $app->id]) }}" class="btn btn-sm btn-outline-secondary">
-                        Stajı Bitir
-                    </a>
-                @endif
-            </td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="4" class="text-center">Bu filtreye uygun stajyer bulunamadı.</td>
-        </tr>
-    @endforelse
-</tbody>
-
-    </table>
+    @if($internships->isEmpty())
+        <div class="alert alert-info text-center">Henüz aktif stajyer yok.</div>
+    @else
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>👤 Ad Soyad</th>
+                    <th>📄 İlan</th>
+                    <th>📅 Başlangıç Tarihi</th>
+                    <th>🛠 İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($internships as $intern)
+                    <tr>
+                        <td>{{ $intern->student->user->name }}</td>
+                        <td>{{ $intern->internshipPosting->title ?? '-' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($intern->start_date)->format('d.m.Y') }}</td>
+                        <td>
+                            <a href="{{ route('company.internships.complete', $intern->id) }}" class="btn btn-sm btn-outline-secondary">
+                                Stajı Bitir
+                            </a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </div>
 @endsection

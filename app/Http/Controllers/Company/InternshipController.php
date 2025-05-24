@@ -10,6 +10,8 @@ use App\Models\Application;
 use App\Models\Internship;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
+
 
 
 class InternshipController extends Controller
@@ -88,48 +90,41 @@ class InternshipController extends Controller
         return redirect()->route('company.internships.index')->with('success', 'İlan silindi.');
     }
 
-    public function completeForm(Application $application)
+   public function completeForm(\App\Models\Internship $internship)
 {
-    return view('company.interns.complete', compact('application'));
+    return view('company.interns.complete', compact('internship'));
 }
 
-public function storeCompletion(Request $request, Application $application)
+public function storeCompletion(Request $request, \App\Models\Internship $internship)
 {
-    // Validation işlemi
     $validatedData = $request->validate([
         'start_date' => 'required|date',
         'end_date' => 'required|date|after_or_equal:start_date',
         'report_file' => 'required|file|mimes:pdf,doc,docx|max:2048',
     ]);
 
-    // Dosyayı storage'a kaydet
+    // Dosya kaydı
     if ($request->hasFile('report_file')) {
-        $file = $request->file('report_file');
-        $path = $file->store('report_files', 'public'); // storage/app/public/report_files
-    } else {
-        return back()->withErrors(['report_file' => 'Dosya yüklenemedi.'])->withInput();
+        $path = $request->file('report_file')->store('report_files', 'public');
     }
 
-    // Veritabanına kayıt
-    \App\Models\Internship::create([
-        'student_id' => $application->student_id,
-        'company_id' => $application->internshipPosting->company_id,
+    $internship->update([
         'start_date' => $validatedData['start_date'],
         'end_date' => $validatedData['end_date'],
         'report_file_url' => 'storage/' . $path,
     ]);
 
-    // Başvuru durumu güncelle
-    $application->update(['status' => 'completed']);
-
     return redirect()->route('company.interns.index')->with('success', 'Staj başarıyla tamamlandı.');
 }
+
+
 public function completed()
 {
     $companyId = Auth::user()->company->id;
 
-    $internships = \App\Models\Internship::with(['student.user'])
+    $internships = \App\Models\Internship::with('student.user')
         ->where('company_id', $companyId)
+        ->whereNotNull('end_date') // ✅ EN ÖNEMLİ KISIM
         ->latest()
         ->get();
 

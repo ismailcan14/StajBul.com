@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Başvurularım')
+
 @if(session('error'))
     <div class="alert alert-danger text-center">
         {{ session('error') }}
@@ -30,6 +31,12 @@
                 </thead>
                 <tbody>
                     @foreach($applications as $application)
+                        @php
+                            // Aynı şirketle daha önce herhangi bir staj başlatılmış mı (bitmiş olsa bile)
+                            $alreadyStartedAny = \App\Models\Internship::where('student_id', $application->student_id)
+                                ->where('company_id', $application->internshipPosting->company_id)
+                                ->exists();
+                        @endphp
                         <tr>
                             <td>{{ $application->internshipPosting->title }}</td>
                             <td>{{ $application->internshipPosting->company->company_name ?? '-' }}</td>
@@ -49,7 +56,8 @@
                             </td>
                             <td>{{ $application->created_at->format('d.m.Y H:i') }}</td>
                             <td class="d-flex flex-column gap-1">
-                                @if($application->status === 'accepted')
+                                {{-- Sadece "accepted" ve daha önce bu şirkette staj başlamamışsa --}}
+                                @if($application->status === 'accepted' && !$alreadyStartedAny)
                                     <form method="POST" action="{{ route('applications.confirm', $application->id) }}">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-outline-success w-100">
@@ -58,13 +66,14 @@
                                     </form>
                                 @endif
 
+                                {{-- Başvuru her durumda silinebilir (kabul edilse bile) --}}
                                 <form action="{{ route('student.applications.destroy', $application->id) }}" method="POST" class="delete-form">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
-        <i class="fas fa-trash-alt me-1"></i>İptal Et
-    </button>
-</form>
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                        <i class="fas fa-trash-alt me-1"></i>İptal Et
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

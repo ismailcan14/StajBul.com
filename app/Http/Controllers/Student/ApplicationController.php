@@ -65,26 +65,28 @@ class ApplicationController extends Controller
 
     // ✅ Öğrenci stajı başlatıyor (kabul edilen başvuruyu onaylayarak)
     public function confirmAccepted($id)
-    {
-        $application = Application::findOrFail($id);
+{
+    $application = Application::findOrFail($id);
 
-        if ($application->student_id !== auth()->user()->student->id || $application->status !== 'accepted') {
-            return redirect()->back()->with('error', 'Bu başvuruyu onaylayamazsınız.');
-        }
-
-        // Zaten aktif stajı varsa engelle
-        $hasActiveInternship = auth()->user()->student->internships()->whereNull('end_date')->exists();
-
-        if ($hasActiveInternship) {
-            return redirect()->back()->with('error', 'Devam eden bir stajınız var.');
-        }
-
-        Internship::create([
-            'student_id' => $application->student_id,
-            'company_id' => $application->internshipPosting->company_id,
-            'start_date' => now(),
-        ]);
-
-        return redirect()->route('student.internships.index')->with('success', 'Stajınız başlatıldı.');
+    if ($application->student_id !== auth()->user()->student->id || $application->status !== 'accepted') {
+        return redirect()->back()->with('error', 'Bu başvuruyu onaylayamazsınız.');
     }
+
+    // Aktif staj kontrolü
+    $activeInternship = auth()->user()->student->internships()->whereNull('end_date')->first();
+
+    if ($activeInternship) {
+        return redirect()->back()->with('error', 'Devam eden bir stajınız var. Yeni bir staj başlatamazsınız.');
+    }
+
+    Internship::create([
+        'student_id' => $application->student_id,
+        'company_id' => $application->internshipPosting->company_id,
+        'start_date' => now(),
+        'report_file_url' => null,
+    ]);
+
+    return redirect()->route('student.internship.active')->with('success', 'Stajınız başlatıldı.');
+}
+
 }
