@@ -14,26 +14,34 @@
 <body>
 
 <div class="login-container">
-    <form method="POST" action="{{ route('login') }}" class="login-box animate">
-        @csrf
+ <form method="POST" action="{{ route('login') }}" class="login-box animate">
+    @csrf
 
-        {{-- Logo üstte ortalı --}}
-        <div class="logo-wrapper">
-            <img src="{{ asset('images/stajbul-logo.png') }}" alt="StajBul Logo">
+    {{-- Logo üstte ortalı --}}
+    <div class="logo-wrapper">
+        <img src="{{ asset('images/stajbul-logo.png') }}" alt="StajBul Logo">
+    </div>
+
+    <h2>Giriş Yap</h2>
+
+    @if ($errors->any())
+        <div class="error-message">
+            {{ $errors->first() }}
         </div>
+    @endif
 
-        <h2>Giriş Yap</h2>
+    <input name="email" type="email" placeholder="E-posta" required>
+    <input name="password" type="password" placeholder="Şifre" required>
 
-        @if ($errors->any())
-            <div class="error-message">
-                {{ $errors->first() }}
-            </div>
-        @endif
+    {{-- ✅ Beni Hatırla kutusu --}}
+    <div class="remember-me-wrapper">
+    <input type="checkbox" name="remember" id="remember">
+    <label for="remember">Beni Hatırla</label>
+</div>
 
-        <input name="email" type="email" placeholder="E-posta" required>
-        <input name="password" type="password" placeholder="Şifre" required>
-        <button type="submit">Giriş Yap</button>
-    </form>
+    <button type="submit">Giriş Yap</button>
+</form>
+
 </div>
 
 <!-- Harici JS -->

@@ -97,3 +97,23 @@ body {
 .logo-wrapper img {
     max-height: 240px;
 }
+.remember-me-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-start;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.remember-me-wrapper input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.remember-me-wrapper label {
+    cursor: pointer;
+}
+

@@ -10,12 +10,11 @@ use App\Models\Department;
 
 class AuthController extends Controller
 {
-    
-public function showStudentRegisterForm()
-{
-    $departments = Department::all();
-    return view('auth.register-student', compact('departments'));
-}
+    public function showStudentRegisterForm()
+    {
+        $departments = Department::all();
+        return view('auth.register-student', compact('departments'));
+    }
 
     public function showCompanyRegisterForm()
     {
@@ -92,7 +91,9 @@ public function showStudentRegisterForm()
             'password' => 'required',
         ]);
 
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        $remember = $request->has('remember'); // 🔁 Beni hatırla kontrolü
+
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $remember)) {
             $user = Auth::user();
             return match ($user->role) {
                 'student' => redirect()->route('student.dashboard'),
