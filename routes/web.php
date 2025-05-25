@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
@@ -24,7 +25,6 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\InternshipPostingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CompanyController;
-
 
 
 /*
@@ -56,7 +56,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 | Öğrenci Paneli Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('student')->group(function () {
+Route::middleware(['auth', 'checkRole:student'])->prefix('student')->group(function () {
     Route::get('/dashboard', fn () => view('student.dashboard'))->name('student.dashboard');
 
     // Staj ilanları
@@ -90,7 +90,7 @@ Route::middleware(['auth'])->prefix('student')->group(function () {
 | Şirket Paneli Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('company')->group(function () {
+Route::middleware(['auth', 'checkRole:company'])->prefix('company')->group(function () {
     Route::get('/dashboard', fn () => view('company.dashboard'))->name('company.dashboard');
 
     // İlanlar
@@ -113,7 +113,7 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
     // Stajyerler
     Route::get('/interns', [CompanyInternController::class, 'index'])->name('company.interns.index');
 
-    // 🔄 Stajı tamamlama (internship üzerinden)
+    // Stajı tamamlama
     Route::get('/internships/complete/{internship}', [CompanyInternshipController::class, 'completeForm'])->name('company.internships.complete');
     Route::post('/internships/complete/{internship}', [CompanyInternshipController::class, 'storeCompletion'])->name('company.internships.complete.store');
 
@@ -133,27 +133,26 @@ Route::middleware(['auth'])->prefix('company')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->middleware(['auth', 'checkRole:admin'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/applications', [AdminApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{id}/approve', [AdminApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{id}/reject', [AdminApplicationController::class, 'reject'])->name('applications.reject');
     Route::get('/applications/{id}', [AdminApplicationController::class, 'show'])->name('applications.show');
 
-    Route::get('/internship-postings/pending', [\App\Http\Controllers\Admin\InternshipPostingController::class, 'pending'])->name('internship-postings.pending');
-    Route::get('/internship-postings/{id}', [\App\Http\Controllers\Admin\InternshipPostingController::class, 'show'])->name('internship-postings.show');
-    Route::post('/internship-postings/{id}/approve', [\App\Http\Controllers\Admin\InternshipPostingController::class, 'approve'])->name('internship-postings.approve');
-    Route::post('/internship-postings/{id}/reject', [\App\Http\Controllers\Admin\InternshipPostingController::class, 'reject'])->name('internship-postings.reject');
-    Route::get('/companies', [\App\Http\Controllers\Admin\CompanyController::class, 'index'])->name('companies.index');
-    Route::get('/companies/{id}', [\App\Http\Controllers\Admin\CompanyController::class, 'show'])->name('companies.show');
-    Route::delete('/companies/{id}', [\App\Http\Controllers\Admin\CompanyController::class, 'destroy'])->name('companies.destroy');
-    
-    // Kullanıcı Yönetimi
+    Route::get('/internship-postings/pending', [InternshipPostingController::class, 'pending'])->name('internship-postings.pending');
+    Route::get('/internship-postings/{id}', [InternshipPostingController::class, 'show'])->name('internship-postings.show');
+    Route::post('/internship-postings/{id}/approve', [InternshipPostingController::class, 'approve'])->name('internship-postings.approve');
+    Route::post('/internship-postings/{id}/reject', [InternshipPostingController::class, 'reject'])->name('internship-postings.reject');
+
+    Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
+    Route::get('/companies/{id}', [CompanyController::class, 'show'])->name('companies.show');
+    Route::delete('/companies/{id}', [CompanyController::class, 'destroy'])->name('companies.destroy');
+
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-    
-    // Oturum yönetimi
+
     Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
