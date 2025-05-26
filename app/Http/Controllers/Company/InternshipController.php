@@ -54,8 +54,14 @@ class InternshipController extends Controller
 
     public function index()
     {
-        $internships = Auth::user()->company->internshipPostings()->latest()->get();
-        return view('company.internships.index', compact('internships'));
+    $internships = Auth::user()->company
+    ->internshipPostings()
+    ->where('is_approved', true)
+    ->latest()
+    ->get();
+
+return view('company.internships.index', compact('internships'));
+
     }
 
     public function edit($id)

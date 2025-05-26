@@ -13,9 +13,9 @@ class InternController extends Controller
     public function index(Request $request)
     {
         $companyId = Auth::user()->company->id;
-        $filter = $request->query('filter');
+        $filter = $request->query('filter', 'active'); // ✅ Varsayılan olarak 'active'
 
-        // Stajı gerçekten başlayanlar (aktif stajyerler)
+        // 🔹 Aktif stajyerler
         if ($filter === 'active') {
             $internships = Internship::with('student.user', 'internshipPosting')
                 ->where('company_id', $companyId)
@@ -29,41 +29,38 @@ class InternController extends Controller
             ]);
         }
 
-        // Henüz başlamamış ama başvurusu kabul edilmiş olanlar
-      // Onaylı Ama Henüz Başlamamış
-elseif ($filter === 'accepted') {
-    $currentFilter = 'accepted';
+        // 🔹 Onaylı Ama Henüz Başlamamış
+        if ($filter === 'accepted') {
+            $applications = Application::with('student.user', 'internshipPosting')
+                ->whereHas('internshipPosting', fn($q) => $q->where('company_id', $companyId))
+                ->where('status', 'accepted')
+                ->whereDoesntHave('student.internships', fn($q) =>
+                    $q->where('company_id', $companyId)
+                )
+                ->latest()
+                ->get();
 
-    $applications = Application::with('student.user', 'internshipPosting')
-        ->whereHas('internshipPosting', fn($q) => $q->where('company_id', $companyId))
-        ->where('status', 'accepted')
-        ->whereDoesntHave('student.internships', function ($q) use ($companyId) {
-            $q->where('company_id', $companyId);
-        })
-        ->latest()
-        ->get();
+            return view('company.interns.pending_accepteds', [
+                'applications' => $applications,
+                'currentFilter' => 'accepted'
+            ]);
+        }
 
-    return view('company.interns.pending_accepteds', compact('applications', 'currentFilter'));
-}
-
-
-        // Reddedilen başvurular
-        elseif ($filter === 'rejected') {
-            $currentFilter = 'rejected'; // ✅ eklendi
-
+        // 🔹 Reddedilen başvurular
+        if ($filter === 'rejected') {
             $applications = Application::with('student.user', 'internshipPosting')
                 ->whereHas('internshipPosting', fn($q) => $q->where('company_id', $companyId))
                 ->where('status', 'rejected')
                 ->latest()
                 ->get();
 
-            return view('company.interns.rejected', compact('applications', 'currentFilter'));
+            return view('company.interns.rejected', [
+                'applications' => $applications,
+                'currentFilter' => 'rejected'
+            ]);
         }
 
-        // Varsayılan olarak boş koleksiyon döndür
-        return view('company.interns.index', [
-            'internships' => collect(),
-            'currentFilter' => 'active'
-        ]);
+        // Varsayılan dönüş (normalde buraya düşmez)
+        return redirect()->route('company.interns.index', ['filter' => 'active']);
     }
 }

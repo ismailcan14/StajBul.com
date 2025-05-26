@@ -15,23 +15,33 @@ class ProfileController extends Controller
         return view('company.profile.edit', compact('company'));
     }
 
-   public function update(Request $request)
-{
-    $company = Auth::user()->company;
+    public function update(Request $request)
+    {
+        $company = Auth::user()->company;
 
-    $request->validate([
-        'company_name' => 'required|string|max:255',
-        'tax_number' => 'required|string|max:50',
-        'authorized_person' => 'required|string|max:100',
-        'address' => 'required|string|max:500',
-        'logo' => 'nullable|url',
-    ]);
+        $request->validate([
+            'company_name' => 'required|string|max:255',
+            'tax_number' => 'required|string|max:50',
+            'authorized_person' => 'required|string|max:100',
+            'address' => 'required|string|max:500',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    $data = $request->only(['company_name', 'tax_number', 'authorized_person', 'address', 'logo']);
+        $data = $request->only(['company_name', 'tax_number', 'authorized_person', 'address']);
 
-    $company->update($data);
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $path = $file->store('company_logos', 'public');
 
-    return redirect()->route('company.profile.edit')->with('success', 'Profil başarıyla güncellendi.');
-}
+            if ($company->logo && Storage::disk('public')->exists($company->logo)) {
+                Storage::disk('public')->delete($company->logo);
+            }
 
+            $data['logo'] = $path;
+        }
+
+        $company->update($data);
+
+        return redirect()->route('company.profile.edit')->with('success', 'Profil başarıyla güncellendi.');
+    }
 }

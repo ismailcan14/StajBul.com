@@ -18,14 +18,7 @@
     </div>
 
     <div class="mt-4 d-flex gap-2">
-        <form action="{{ route('admin.applications.approve', $posting->id) }}" method="POST">
-            @csrf
-            <button class="btn btn-success"><i class="fas fa-check"></i> Onayla</button>
-        </form>
-        <form action="{{ route('admin.applications.reject', $posting->id) }}" method="POST" onsubmit="return confirm('İlanı reddetmek istediğinize emin misiniz?');">
-            @csrf
-            <button class="btn btn-danger"><i class="fas fa-times"></i> Reddet</button>
-        </form>
+       
         <a href="{{ route('admin.applications.index') }}" class="btn btn-secondary">Geri Dön</a>
     </div>
 </div>

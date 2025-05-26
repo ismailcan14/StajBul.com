@@ -11,10 +11,12 @@ class ApplicationController extends Controller
     public function index()
     {
         $postings = InternshipPosting::with('company')
-            ->orderBy('created_at', 'desc')
-            ->get();
+    ->where('is_approved', false) // ya da ->where('is_approved', 0)
+    ->orderBy('created_at', 'desc')
+    ->get();
 
-        return view('admin.applications.index', compact('postings'));
+return view('admin.applications.index', compact('postings'));
+
     }
     public function show($id)
 {
@@ -35,10 +37,10 @@ class ApplicationController extends Controller
 
     public function reject($id)
     {
-        $posting = InternshipPosting::findOrFail($id);
-        $posting->is_approved = false;
-        $posting->save();
+      $posting = InternshipPosting::findOrFail($id);
+$posting->delete();
 
-        return redirect()->back()->with('success', 'İlan reddedildi.');
+return redirect()->back()->with('success', 'İlan kalıcı olarak silindi.');
+
     }
 }

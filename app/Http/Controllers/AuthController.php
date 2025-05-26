@@ -91,7 +91,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $remember = $request->has('remember'); // 🔁 Beni hatırla kontrolü
+        $remember = $request->has('remember'); 
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $remember)) {
             $user = Auth::user();

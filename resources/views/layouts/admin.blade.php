@@ -8,38 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body {
-            display: flex;
-        }
-        .sidebar {
-            width: 240px;
-            height: 100vh;
-            position: fixed;
-            background-color: #1e293b;
-            color: white;
-            padding: 20px;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-        .sidebar a:hover {
-            background-color: #0d6efd;
-            padding-left: 10px;
-            border-radius: 5px;
-        }
-        .content {
-            margin-left: 240px;
-            padding: 30px;
-            width: 100%;
-            background-color: #f4f6f9;
-            min-height: 100vh;
-        }
-    </style>
+
 </head>
 <body>
 

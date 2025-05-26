@@ -5,14 +5,16 @@
 @section('content')
 
 <div class="student-dashboard text-center">
-    <h2 class="student-name">
+    <h2 class="student-name d-flex align-items-center justify-content-center gap-3">
         @php
             $logo = Auth::user()->company->logo ?? null;
         @endphp
 
         @if ($logo)
-            <img src="{{ $logo }}" alt="Logo" style="height: 60px; object-fit: contain;" class="mb-3 d-block mx-auto">
+            <img src="{{ asset('storage/' . $logo) }}" alt="Logo"
+                 style="height: 48px; width: 48px; object-fit: cover; border-radius: 50%;" class="shadow-sm border">
         @endif
+
         {{ Auth::user()->company->company_name }}
     </h2>
 

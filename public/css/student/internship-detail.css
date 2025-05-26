@@ -2,6 +2,7 @@ body {
     font-family: 'Poppins', sans-serif;
     background-color: #f4f6f8;
     margin: 0;
+    padding-top: 100px !important; /* Navbar yüksekliği kadar boşluk bırak */
     padding: 40px;
     color: #333;
 }
